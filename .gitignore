@@ -1,0 +1,4 @@
+scripts/detectron2_weights/*
+yolov5/
+scripts/yolov5_ros
+scripts/.vscode
