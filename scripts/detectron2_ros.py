@@ -33,6 +33,7 @@ from detectron2.config import get_cfg
 from detectron2.utils.visualizer import Visualizer
 from detectron2.data import Metadata
 from detectron2.utils.visualizer import ColorMode
+from detectron2.data import MetadataCatalog, DatasetCatalog
 
 from PIL import Image 
 
@@ -81,7 +82,7 @@ def getMask(out):
 
 def getOrientedBoxes(mask,plot,pub=None):
     if mask is None:
-        return None
+        return None,None
     
     # Convert image to grayscale
     gray = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
@@ -174,13 +175,16 @@ def main():
     # Find a model from detectron2's model zoo. You can use the https://dl.fbaipublicfiles... url as well
     if(args.weights=="default"):
         cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml")
+        my_metadata = MetadataCatalog.get(cfg.DATASETS.TRAIN[0])
+
     else:
         cfg.MODEL.ROI_HEADS.NUM_CLASSES=1
         cfg.MODEL.WEIGHTS = os.path.join(ROOT,"detectron2_weights",args.weights[0])
+        my_metadata = Metadata()
+        my_metadata.set(thing_classes = ['rail'])
 
     predictor = DefaultPredictor(cfg)
-    my_metadata = Metadata()
-    my_metadata.set(thing_classes = ['rail'])
+    
 
     # For test and debug
     if(args.source!='ros'):
