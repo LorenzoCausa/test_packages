@@ -10,6 +10,7 @@ from datetime import datetime
 import math
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image as SensImage
+from geometry_msgs.msg import Pose 
 
 import argparse
 import os
@@ -139,6 +140,7 @@ def getOrientedBoxes(mask,plot,pub=None):
         tot_center[0]=tot_center[0]+centers[i][0]
         tot_center[1]=tot_center[1]+centers[i][1]
     
+    im_width,im_height=gray.shape
     avg_angle=tot_angle/len(angles)
     avg_center=[tot_center[0]/len(centers),tot_center[1]/len(centers)]
     avg_center=[int(avg_center[0]),int(avg_center[1])]
@@ -147,6 +149,8 @@ def getOrientedBoxes(mask,plot,pub=None):
     #print(avg_center)
 
     mask = cv2.circle(mask, (avg_center[0], avg_center[1]), radius=10, color=(0, 0, 255), thickness=3) # draw the center
+    avg_center=[int(100*(avg_center[0]-im_width/2)/im_width),int(100*(avg_center[1]-im_height/2)/im_height)]
+
 
     if plot:
         cv2.imshow("Mask with boxes", mask)
@@ -155,7 +159,7 @@ def getOrientedBoxes(mask,plot,pub=None):
         cv_bridge=CvBridge()
         pub.publish(cv_bridge.cv2_to_imgmsg(mask, 'bgr8'))
 
-    return center,avg_angle,
+    return avg_center,avg_angle,
 
 # SUBSCRIBERs CALLBACK
 def callback(startImg):
@@ -209,6 +213,8 @@ def main():
     else:
         pub_boxes = rospy.Publisher('boxes_and_mask', SensImage, queue_size=1)
         pub_segm = rospy.Publisher('segmentation', SensImage, queue_size=1)
+        pub_loc = rospy.Publisher('localization', Pose, queue_size=1)
+        
         rospy.Subscriber("output/image_raw", SensImage, callback,queue_size=1)
         time.sleep(1)
 
@@ -222,6 +228,12 @@ def main():
             mask=getMask(outputs)
             [center,angle]=getOrientedBoxes(mask,False,pub_boxes)
             showSegmentation(v,outputs,False,pub_segm)
+            if(center is not None and angle is not None):
+                loc=Pose()
+                loc.position.x=center[0]
+                loc.position.y=center[1]
+                loc.orientation.z=angle
+                pub_loc.publish(loc)
 
     #rospy.spin()
 
