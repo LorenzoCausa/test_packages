@@ -1,4 +1,3 @@
-scripts/detectron2_weights/*
+test_pkg/scripts/detectron2_weights/*
 yolov5/
-scripts/yolov5_ros
-scripts/.vscode
+test_pkg/scripts/.vscode
