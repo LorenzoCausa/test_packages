@@ -149,7 +149,7 @@ def getOrientedBoxes(mask,plot,pub=None):
     #print(avg_center)
 
     mask = cv2.circle(mask, (avg_center[0], avg_center[1]), radius=10, color=(0, 0, 255), thickness=3) # draw the center
-    avg_center=[int(100*(avg_center[0]-im_width/2)/im_width),int(100*(avg_center[1]-im_height/2)/im_height)]
+    avg_center=[int(1000*(avg_center[0]-im_width/2)/im_width),int(1000*(avg_center[1]-im_height/2)/im_height)]
 
 
     if plot:

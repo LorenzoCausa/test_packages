@@ -38,7 +38,12 @@ def main():
     while not rospy.is_shutdown():
         cmd.yaw=-angle/10 # - may be due to the inverted image of the simulation
         cmd.throttle=3-ground_distance
-        cmd.pitch=-x/200
+        cmd.pitch=-x/2000
+        if(abs(x)<50 and abs(angle<10)):
+            cmd.roll=0.5
+        else:
+            cmd.roll=0
+            
         command_pub.publish(cmd)
         print("x:",x,", y:",y,", angle:",angle,", ground distance:",ground_distance)
         rate.sleep()
