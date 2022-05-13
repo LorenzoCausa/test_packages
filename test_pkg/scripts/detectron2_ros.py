@@ -219,6 +219,7 @@ def main():
         time.sleep(1)
 
         while not rospy.is_shutdown():
+            now = datetime.now() 
             v = Visualizer(cv_image[:, :, ::-1],
                metadata=my_metadata, 
                scale=1, 
@@ -234,6 +235,7 @@ def main():
                 loc.position.y=center[1]
                 loc.orientation.z=angle
                 pub_loc.publish(loc)
+            print("img seg time: ", datetime.now()-now)
 
     #rospy.spin()
 
