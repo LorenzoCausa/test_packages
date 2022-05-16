@@ -28,6 +28,9 @@ D_gain_throttle=10
 P_gain_pitch=0.001
 D_gain_pitch=0.005
 
+
+altitude=4 # meters
+
 # FUNCTIONs
 def update_olds():
     global old_x,old_y,old_angle,old_ground_distance
@@ -58,7 +61,7 @@ def main():
 
     while not rospy.is_shutdown():
         cmd.yaw =     -P_gain_yaw*angle - D_gain_yaw*(angle-old_angle) # signs may be due to the inverted image of the simulation
-        cmd.throttle = P_gain_throttle*(4 - ground_distance) - D_gain_throttle*(ground_distance-old_ground_distance)
+        cmd.throttle = P_gain_throttle*(altitude - ground_distance) - D_gain_throttle*(ground_distance-old_ground_distance)
         cmd.pitch =    P_gain_pitch*x - D_gain_pitch*(x-old_x)
         #print("P part: ", P_gain_pitch*x,", D part: ",D_gain_pitch*(x-old_x)) 
         update_olds()
@@ -72,8 +75,10 @@ def main():
         #    cmd.roll=0
 
         # speed management2
-        cmd.roll=max(2-abs(x)/100,0)             
-        cmd.roll=cmd.roll+max(2-abs(angle)/20,0) # MAX =2+2=2
+        cmd.roll=max(2-abs(x)/100,0)+max(2-abs(angle)/20,0) # MAX =2+2=4  best for now 
+
+        # speed management3
+        #cmd.roll=max(2-abs(x)/100,0)*max(2-abs(angle)/20,0) # MAX =2*2=4          
  
         command_pub.publish(cmd)
         print("x:",x,", y:",y,", angle:",angle,", ground distance:",ground_distance)
