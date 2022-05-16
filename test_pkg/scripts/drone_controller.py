@@ -60,16 +60,23 @@ def main():
         cmd.yaw =     -P_gain_yaw*angle - D_gain_yaw*(angle-old_angle) # signs may be due to the inverted image of the simulation
         cmd.throttle = P_gain_throttle*(4 - ground_distance) - D_gain_throttle*(ground_distance-old_ground_distance)
         cmd.pitch =    P_gain_pitch*x - D_gain_pitch*(x-old_x)
-        print("P part: ", P_gain_pitch*x,", D part: ",D_gain_pitch*(x-old_x)) 
+        #print("P part: ", P_gain_pitch*x,", D part: ",D_gain_pitch*(x-old_x)) 
         update_olds()
 
-        if(abs(x)<100 and abs(angle<20)):
-            cmd.roll=1
-        else:
-            cmd.roll=0
-            
+        # speed management1
+        #if(abs(x)<10 and abs(angle<5)):
+        #    cmd.roll=1
+        #elif(abs(x)<100 and abs(angle<20)):
+        #    cmd.roll=0.5
+        #else:
+        #    cmd.roll=0
+
+        # speed management2
+        cmd.roll=max(2-abs(x)/100,0)             
+        cmd.roll=cmd.roll+max(2-abs(angle)/20,0) # MAX =2+2=2
+ 
         command_pub.publish(cmd)
-        #print("x:",x,", y:",y,", angle:",angle,", ground distance:",ground_distance)
+        print("x:",x,", y:",y,", angle:",angle,", ground distance:",ground_distance)
         rate.sleep()
 
 if __name__ == "__main__":
