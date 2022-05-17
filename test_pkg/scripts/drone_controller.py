@@ -44,7 +44,7 @@ def callback_loc(pose):
     global x,y,angle
     x=pose.position.x
     y=pose.position.y
-    angle=pose.orientation.z-90
+    angle=pose.orientation.z
 
 def callback_ground(distance):
     global ground_distance
@@ -75,7 +75,7 @@ def main():
         #    cmd.roll=0
 
         # speed management2
-        cmd.roll=max(2-abs(x)/100,0)+max(2-abs(angle)/20,0) # MAX =2+2=4  best for now 
+        #cmd.roll=max(2-abs(x)/100,0)+max(2-abs(angle)/20,0) # MAX =2+2=4  best for now 
 
         # speed management3
         #cmd.roll=max(2-abs(x)/100,0)*max(2-abs(angle)/20,0) # MAX =2*2=4          

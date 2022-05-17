@@ -83,7 +83,7 @@ def getMask(out):
 
 def getOrientedBoxes(mask,plot,pub=None):
     if mask is None:
-        return None,None
+        return None,None,None
     
     # Convert image to grayscale
     gray = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
@@ -125,6 +125,8 @@ def getOrientedBoxes(mask,plot,pub=None):
         if angle > 180:
             angle=angle-180
 
+        angle=angle-90
+
         angles.append(angle)
         centers.append(center)
 
@@ -153,7 +155,12 @@ def getOrientedBoxes(mask,plot,pub=None):
 
     mask = cv2.circle(mask, (avg_center[0], avg_center[1]), radius=10, color=(0, 0, 255), thickness=3) # draw the center
     avg_center=[int(1000*(avg_center[0]-im_width/2)/im_width),int(1000*(avg_center[1]-im_height/2)/im_height)]
+    if(width<height):
+        norm_width=width/im_width
+    else:
+        norm_width=height/im_width
 
+    altitude=1.125/norm_width # NEED TO BE ADJUSTED, RIGHT NOW IS SETTED FOR THE SIMULATION
 
     if plot:
         cv2.imshow("Mask with boxes", mask)
@@ -162,7 +169,7 @@ def getOrientedBoxes(mask,plot,pub=None):
         cv_bridge=CvBridge()
         pub.publish(cv_bridge.cv2_to_imgmsg(mask, 'bgr8'))
 
-    return avg_center,avg_angle,
+    return avg_center,avg_angle,altitude
 
 # SUBSCRIBERs CALLBACK
 def callback(startImg):
@@ -178,7 +185,7 @@ def main():
     # add project-specific config (e.g., TensorMask) here if you're not running a model in detectron2's core library
     cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.9  # set threshold for this model
-    cfg.MODEL.DEVICE='cuda' # Run on CPU
+    cfg.MODEL.DEVICE='cpu' # Run on cpu/cuda
     # Find a model from detectron2's model zoo. You can use the https://dl.fbaipublicfiles... url as well
     if(args.weights=="default"):
         cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml")
@@ -230,12 +237,13 @@ def main():
                )
             outputs = predictor(cv_image)
             mask=getMask(outputs)
-            [center,angle]=getOrientedBoxes(mask,False,pub_boxes)
+            [center,angle,altitude]=getOrientedBoxes(mask,False,pub_boxes)
             showSegmentation(v,outputs,False,pub_segm)
             if(center is not None and angle is not None):
                 loc=Pose()
                 loc.position.x=center[0]
                 loc.position.y=center[1]
+                loc.position.z=altitude
                 loc.orientation.z=angle
                 pub_loc.publish(loc)
             print("img seg time: ", datetime.now()-now)
