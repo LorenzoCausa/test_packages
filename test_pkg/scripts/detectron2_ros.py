@@ -44,10 +44,10 @@ cv_image=None
 # FUNCTIONS
 def parse_opt():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', nargs='+', type=str, default='default', help='model path(s)')
-    parser.add_argument('--source', nargs='+', type=str, default='ros', help='path to an image, default works with ros')
+    parser.add_argument('--weights', nargs='+', type=str, default='default', help='Model path(s)')
+    parser.add_argument('--source', nargs='+', type=str, default='ros', help='Path to an image, default works with ros')
     parser.add_argument('--device', nargs='+', type=str, default=['cuda'], help='Device to use: cpu or cuda')
-    parser.add_argument('--confidence', nargs='+', type=float, default=[0.7], help='Device to use: cpu or cuda')
+    parser.add_argument('--confidence', nargs='+', type=float, default=[0.7], help='Min confidence to do mask')
     opt = parser.parse_args()
     return opt
 
