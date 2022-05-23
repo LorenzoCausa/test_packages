@@ -34,20 +34,41 @@ def sub_server(indirizzo, backlog=1): # blacklog quante richieste può accettare
         print("server crash {error}")
         print("try to rerun the server")
         sub_server(indirizzo, backlog=1)
-        
+
+    dim=0 
+    start=time.time()
+
     while True:
         conn, indirizzo_client = s.accept() # accetto la richiesta di un client, 
                                             # funzione che ritorna la connessione (il socket del client) e l'inidrizzo del client 
-        
+        string = ''
+        buf = bytes(string,encoding="utf-8")
+        while len(buf)<4:
+            buf += conn.recv(4 - len(buf))
+        size = struct.unpack('!i', buf)
+        #print("receiving %s bytes" % size)
+        #print(indirizzo_client)
+        data1=''
         while True:
-            data = conn.recv(1024)
-            print("received data")
-            count=count+1
-            print(count) 
-            print(data)
+            data = conn.recv(65536)
+            #print("received data")
+            #count=count+1
+            #print(count) 
+            #print(data)
+            #print('last msg dimension: ',sys.getsizeof(data),"Bytes") 
+            #data1=data1+data
+            dim=dim+sys.getsizeof(data)
             if not data:
+                #print('BREAK')
                 break
-        
+
+        if(time.time()-start>1):
+            print("speed: ",round(dim/(1000*(time.time()-start)),0) ,"Kbyte/s")
+            dim=0
+            start=time.time()
+
+        #print('last msg dimension: ',sys.getsizeof(data)) 
+        #print(data1)
     conn.close() 
 
 if __name__ == "__main__":
@@ -63,5 +84,5 @@ if __name__ == "__main__":
     print("IP Address: ", ip_add)
     
     #creating the server at the specified ip and port
-    sub_server((ip_add,8888))
+    sub_server((ip_add,8081))
 

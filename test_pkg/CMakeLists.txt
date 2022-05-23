@@ -177,6 +177,7 @@ include_directories(
    scripts/command_publisher.py
    scripts/test_publisher.py
    scripts/detectron2_ros.py
+   scripts/UDP_socket_test_speed.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 
