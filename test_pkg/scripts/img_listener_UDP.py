@@ -27,7 +27,7 @@ def UDP_server(localIP,localPort):
         img.data = data
         img.format = "jpg"
         image_pub.publish(img)
-        if(count%10):
+        if(count%10==0):
             print("received: ", count," images")
         
 
