@@ -72,7 +72,7 @@ def main():
         if(cmd.pitch>5): # MAX roll/pitch DJI= 15m/s 
             cmd.pitch=5*(abs(cmd.pitch)/cmd.pitch)
 
-        print("P part: ", -P_gain_yaw*angle,", D part: ",- D_gain_yaw*(angle-old_angle)) 
+        #print("P part: ", -P_gain_yaw*angle,", D part: ",- D_gain_yaw*(angle-old_angle)) 
         update_olds()
 
         # speed management1
@@ -90,7 +90,7 @@ def main():
         #cmd.roll=max(2-abs(x)/50,0)*max(2-abs(angle)/10,0) # MAX =2*2=4          
  
         command_pub.publish(cmd)
-        #print("x:",x,", y:",y,", angle:",angle,", ground distance:",ground_distance)
+        print("x:",x,", y:",y,", angle:",angle,", ground distance:",ground_distance)
         rate.sleep()
 
 if __name__ == "__main__":
