@@ -162,7 +162,7 @@ def getOrientedBoxes(mask,plot,pub=None):
     else:
         norm_width=height/im_width
 
-    altitude=0.65/norm_width # NEED TO BE ADJUSTED, RIGHT NOW IS SETTED FOR THE SIMULATION
+    altitude=0.65/(norm_width+0.01) # NEED TO BE ADJUSTED, RIGHT NOW IS SETTED FOR THE SIMULATION
 
     if plot:
         cv2.imshow("Mask with boxes", mask)
