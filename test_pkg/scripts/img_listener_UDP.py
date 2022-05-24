@@ -19,14 +19,16 @@ def UDP_server(localIP,localPort):
     while not rospy.is_shutdown():
         bytesAddressPair = UDPServerSocket.recvfrom(65536)
         data = bytesAddressPair[0]
-        address = bytesAddressPair[1]
+        #address = bytesAddressPair[1]
         count = count+1   
-        print('last image dimension: ',sys.getsizeof(data))
-        print("received: ", count," images")     
+        #print('last image dimension: ',sys.getsizeof(data))
+        #print("received: ", count," images")     
         img = CompressedImage()
         img.data = data
         img.format = "jpg"
         image_pub.publish(img)
+        if(count%10):
+            print("received: ", count," images")
         
 
 if __name__ == "__main__":
