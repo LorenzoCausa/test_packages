@@ -89,6 +89,7 @@ def getOrientedBoxes(mask,plot,pub=None):
     
     # Convert image to grayscale
     gray = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+    im_width,im_height=gray.shape
 
     # Convert image to binary
     _, bw = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY)
@@ -98,6 +99,7 @@ def getOrientedBoxes(mask,plot,pub=None):
     
     angles=[]
     centers=[]
+    sum_altitudes=0
 
     for i, c in enumerate(contours): 
         # Calculate the area of each contour
@@ -129,6 +131,13 @@ def getOrientedBoxes(mask,plot,pub=None):
 
         angle=angle-90
 
+        if(width<height):
+            norm_width=width/im_width
+        else:
+            norm_width=height/im_width
+        
+        sum_altitudes=sum_altitudes+0.75/(norm_width+0.01) # NEED TO BE ADJUSTED, RIGHT NOW IS SETTED FOR THE SIMULATION
+
         angles.append(angle)
         centers.append(center)
 
@@ -147,22 +156,16 @@ def getOrientedBoxes(mask,plot,pub=None):
         tot_center[0]=tot_center[0]+centers[i][0]
         tot_center[1]=tot_center[1]+centers[i][1]
     
-    im_width,im_height=gray.shape
     avg_angle=tot_angle/len(angles)
     avg_center=[tot_center[0]/len(centers),tot_center[1]/len(centers)]
     avg_center=[int(avg_center[0]),int(avg_center[1])]
+    avg_altitude=sum_altitudes/len(angles)
 
     #print(avg_angle)
     #print(avg_center)
 
     mask = cv2.circle(mask, (avg_center[0], avg_center[1]), radius=10, color=(0, 0, 255), thickness=3) # draw the center
     avg_center=[int(1000*(avg_center[0]-im_width/2)/im_width),int(1000*(avg_center[1]-im_height/2)/im_height)]
-    if(width<height):
-        norm_width=width/im_width
-    else:
-        norm_width=height/im_width
-
-    altitude=0.65/(norm_width+0.01) # NEED TO BE ADJUSTED, RIGHT NOW IS SETTED FOR THE SIMULATION
 
     if plot:
         cv2.imshow("Mask with boxes", mask)
@@ -171,7 +174,7 @@ def getOrientedBoxes(mask,plot,pub=None):
         cv_bridge=CvBridge()
         pub.publish(cv_bridge.cv2_to_imgmsg(mask, 'bgr8'))
 
-    return avg_center,avg_angle,altitude
+    return avg_center,avg_angle,avg_altitude
 
 # SUBSCRIBERs CALLBACK
 def callback(startImg):
