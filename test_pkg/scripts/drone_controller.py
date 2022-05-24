@@ -19,8 +19,8 @@ old_y=float(0)
 old_angle=float(0)
 old_ground_distance=float(3)
 
-P_gain_yaw=0.5
-D_gain_yaw=100
+P_gain_yaw=1
+D_gain_yaw=20
 
 P_gain_throttle=1
 D_gain_throttle=10
@@ -57,7 +57,7 @@ def main():
     command_pub=rospy.Publisher("command", Drone_cmd, queue_size=1)
 
     cmd=Drone_cmd()
-    rate = rospy.Rate(100) # 100hz 
+    rate = rospy.Rate(20) # 20hz 
 
     while not rospy.is_shutdown():
         cmd.yaw =     -P_gain_yaw*angle - D_gain_yaw*(angle-old_angle) # signs may be due to the inverted image of the simulation
@@ -72,7 +72,7 @@ def main():
         if(cmd.pitch>5): # MAX roll/pitch DJI= 15m/s 
             cmd.pitch=5*(abs(cmd.pitch)/cmd.pitch)
 
-        #print("P part: ", P_gain_pitch*x,", D part: ",D_gain_pitch*(x-old_x)) 
+        print("P part: ", -P_gain_yaw*angle,", D part: ",- D_gain_yaw*(angle-old_angle)) 
         update_olds()
 
         # speed management1
@@ -90,7 +90,7 @@ def main():
         #cmd.roll=max(2-abs(x)/50,0)*max(2-abs(angle)/10,0) # MAX =2*2=4          
  
         command_pub.publish(cmd)
-        print("x:",x,", y:",y,", angle:",angle,", ground distance:",ground_distance)
+        #print("x:",x,", y:",y,", angle:",angle,", ground distance:",ground_distance)
         rate.sleep()
 
 if __name__ == "__main__":
