@@ -48,7 +48,7 @@ def parse_opt():
     parser.add_argument('--source', nargs='+', type=str, default='ros', help='Path to an image, default works with ros')
     parser.add_argument('--device', nargs='+', type=str, default=['cuda'], help='Device to use: cpu or cuda')
     parser.add_argument('--confidence', nargs='+', type=float, default=[0.7], help='Min confidence to do mask')
-    parser.add_argument('--show_segmentation', nargs='+', type=bool, default=False, help='True or False, publish the segmentation or not')
+    parser.add_argument('--show_segmentation', nargs='+', type=bool, default=False, help='True or False, publish the segmentation or not, without segmentation is faster')
     opt = parser.parse_args()
     return opt
 
