@@ -48,6 +48,7 @@ def parse_opt():
     parser.add_argument('--source', nargs='+', type=str, default='ros', help='Path to an image, default works with ros')
     parser.add_argument('--device', nargs='+', type=str, default=['cuda'], help='Device to use: cpu or cuda')
     parser.add_argument('--confidence', nargs='+', type=float, default=[0.7], help='Min confidence to do mask')
+    parser.add_argument('--show_segmentation', nargs='+', type=bool, default=False, help='True or False, publish the segmentation or not')
     opt = parser.parse_args()
     return opt
 
@@ -204,6 +205,7 @@ def main():
 
     predictor = DefaultPredictor(cfg)
     
+    show_segmentation=args.show_segmentation
 
     # For test and debug
     if(args.source!='ros'):
@@ -244,7 +246,11 @@ def main():
             outputs = predictor(cv_image)
             mask=getMask(outputs)
             [center,angle,altitude]=getOrientedBoxes(mask,False,pub_boxes)
-            showSegmentation(v,outputs,False,pub_segm)
+            #[center,angle,altitude]=getOrientedBoxes(mask,False)
+
+            if(show_segmentation):
+                showSegmentation(v,outputs,False,pub_segm)
+
             if(center is not None and angle is not None):
                 loc=Pose()
                 loc.position.x=center[0]
