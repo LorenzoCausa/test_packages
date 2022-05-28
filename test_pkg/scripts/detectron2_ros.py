@@ -18,7 +18,7 @@ import sys
 
 from pathlib import Path
 FILE = Path(__file__).resolve()
-ROOT = FILE.parents[0]  # YOLOv5 root directory
+ROOT = FILE.parents[0]  # root directory
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
@@ -49,6 +49,7 @@ def parse_opt():
     parser.add_argument('--device', nargs='+', type=str, default=['cuda'], help='Device to use: cpu or cuda')
     parser.add_argument('--confidence', nargs='+', type=float, default=[0.7], help='Min confidence to do mask')
     parser.add_argument('--show_segmentation', nargs='+', type=bool, default=False, help='True or False, publish the segmentation or not, without segmentation is faster')
+    parser.add_argument('--save_frames', nargs='+', type=int, default=0, help='put anything put 0 to save frames')
     opt = parser.parse_args()
     return opt
 
@@ -187,6 +188,7 @@ def callback(startImg):
 def main():
     rospy.init_node('detectron2', anonymous=False)
     args= parse_opt()
+    save_frames=args.save_frames[0]
     cfg = get_cfg()
     # add project-specific config (e.g., TensorMask) here if you're not running a model in detectron2's core library
     cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
@@ -250,6 +252,11 @@ def main():
 
             if(show_segmentation):
                 showSegmentation(v,outputs,False,pub_segm)
+
+            if(save_frames>0):
+                frame_name="frame"+str(save_frames)+".jpg"
+                cv2.imwrite(os.path.join(ROOT,"frames",frame_name), cv_image)
+                save_frames=save_frames+1
 
             if(center is not None and angle is not None):
                 loc=Pose()
