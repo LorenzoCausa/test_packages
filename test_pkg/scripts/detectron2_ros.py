@@ -49,7 +49,7 @@ def parse_opt():
     parser.add_argument('--device', nargs='+', type=str, default=['cuda'], help='Device to use: cpu or cuda')
     parser.add_argument('--confidence', nargs='+', type=float, default=[0.7], help='Min confidence to do mask')
     parser.add_argument('--show_segmentation', nargs='+', type=bool, default=False, help='True or False, publish the segmentation or not, without segmentation is faster')
-    parser.add_argument('--save_frames', nargs='+', type=int, default=[0], help='put anything put 0 to save frames')
+    parser.add_argument('--save_frames', nargs='+', type=int, default=[0], help='put anything put 0 to save segmentation, show_segmentation must be True')
     opt = parser.parse_args()
     return opt
 
@@ -61,6 +61,7 @@ def showSegmentation(visualizer,out,plot=True,pub=None):
         cv_bridge=CvBridge()
         pub.publish(cv_bridge.cv2_to_imgmsg(out_vis.get_image()[:, :, ::-1], 'bgr8'))
     #cv2.waitKey(0)
+    return out_vis
 
 def getMask(out):
     masks = np.asarray(out["instances"].pred_masks.to("cpu"))
@@ -251,12 +252,12 @@ def main():
             #[center,angle,altitude]=getOrientedBoxes(mask,False)
 
             if(show_segmentation):
-                showSegmentation(v,outputs,False,pub_segm)
+                segmentation=showSegmentation(v,outputs,False,pub_segm)
 
-            if(save_frames>0):
-                frame_name="frame"+str(save_frames)+".jpg"
-                cv2.imwrite(os.path.join(ROOT,"frames",frame_name), cv_image)
-                save_frames=save_frames+1
+                if(save_frames>0):
+                    frame_name="frame"+str(save_frames)+".jpg"
+                    cv2.imwrite(os.path.join(ROOT,"frames",frame_name), segmentation.get_image()[:, :, ::-1])
+                    save_frames=save_frames+1
 
             if(center is not None and angle is not None):
                 loc=Pose()
