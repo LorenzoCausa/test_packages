@@ -6,7 +6,6 @@ import roslib
 import numpy as np
 import cv2
 import time
-from datetime import datetime
 import math
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image as SensImage
@@ -215,7 +214,7 @@ def main():
         img = cv2.imread(args.source[0])
         #cv2.imshow("my image",img)
         #cv2.waitKey()
-        now = datetime.now()   
+        now = time.time()   
         outputs = predictor(img)
         
         v = Visualizer(img[:, :, ::-1],
@@ -228,7 +227,7 @@ def main():
         getOrientedBoxes(mask,True)
         showSegmentation(v,outputs)
         print("img dimension: ",img.shape)
-        print("total time: ", datetime.now()-now)
+        print("total time: ", time.time()-now)
         cv2.waitKey(0)
 
     else:
@@ -240,7 +239,7 @@ def main():
         time.sleep(1)
 
         while not rospy.is_shutdown():
-            now = datetime.now() 
+            now = time.time() 
             v = Visualizer(cv_image[:, :, ::-1],
                metadata=my_metadata, 
                scale=1, 
@@ -267,7 +266,7 @@ def main():
                 loc.orientation.z=angle
                 pub_loc.publish(loc)
             print("img dimension: ",cv_image.shape)
-            print("img seg time: ", datetime.now()-now)
+            print("img seg time: ", time.time()-now)
 
     #rospy.spin()
 
