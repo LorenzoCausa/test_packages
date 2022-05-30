@@ -213,24 +213,60 @@ def main():
 
     # For test and debug
     if(args.source!='ros'):
-        img = cv2.imread(args.source[0])
-        #cv2.imshow("my image",img)
-        #cv2.waitKey()
-        now = time.time()   
-        outputs = predictor(img)
+        if(os.path.isfile(args.source[0])):
+            img = cv2.imread(args.source[0])
+            # resize image
+            dsize = (512, 512)
+            img = cv2.resize(img, dsize, interpolation = cv2.INTER_AREA)
+            #cv2.imshow("my image",img)
+            #cv2.waitKey()
+            now = time.time()   
+            outputs = predictor(img)
         
-        v = Visualizer(img[:, :, ::-1],
+            v = Visualizer(img[:, :, ::-1],
                metadata=my_metadata, 
                scale=1, 
                instance_mode=ColorMode.IMAGE_BW    # remove the colors of unsegmented pixels. This option is only available for segmentation models
                )
 
-        mask=getMask(outputs)
-        getOrientedBoxes(mask,True)
-        showSegmentation(v,outputs)
-        print("img dimension: ",img.shape)
-        print("total time: ", time.time()-now)
-        cv2.waitKey(0)
+            mask=getMask(outputs)
+            getOrientedBoxes(mask,True)
+            showSegmentation(v,outputs)
+            print("img dimension: ",img.shape)
+            print("total time: ", time.time()-now)
+            cv2.waitKey(0)
+
+        if(os.path.isdir(args.source[0])):
+            
+            files = [f for f in os.listdir(args.source[0]) if os.path.isfile(os.path.join(args.source[0], f))]
+            #for sorting the file names properly
+            files.sort()
+    
+            for i in range(len(files)):
+                filename=args.source[0] + files[i]
+                # reading each files
+                img = cv2.imread(filename)
+                # resize image
+                dsize = (512, 512)
+                img = cv2.resize(img, dsize, interpolation = cv2.INTER_AREA)
+                now = time.time()   
+                outputs = predictor(img)
+        
+                v = Visualizer(img[:, :, ::-1],
+                    metadata=my_metadata, 
+                    scale=1, 
+                    instance_mode=ColorMode.IMAGE_BW    # remove the colors of unsegmented pixels. This option is only available for segmentation models
+                    )
+
+                mask=getMask(outputs)
+                getOrientedBoxes(mask,True)
+                showSegmentation(v,outputs)
+                print("img dimension: ",img.shape)
+                print("total time: ", time.time()-now)
+                cv2.waitKey(0)
+                
+            print("Done all test images")
+                
 
     else:
         pub_boxes = rospy.Publisher('boxes_and_mask', SensImage, queue_size=1)
