@@ -54,7 +54,7 @@ def main():
     rospy.init_node('drone_controller', anonymous=False)
     rospy.Subscriber("localization", Pose, callback_loc,queue_size=1)
     rospy.Subscriber("ground_distance", Float32, callback_ground,queue_size=1)
-    command_pub=rospy.Publisher("command", Drone_cmd, queue_size=1)
+    command_pub=rospy.Publisher("command", Drone_cmd, queue_size=1) #maybe is better to use cmd_vel
 
     cmd=Drone_cmd()
     rate = rospy.Rate(20) # 20hz 
@@ -65,11 +65,11 @@ def main():
             cmd.yaw=30*(abs(cmd.yaw)/cmd.yaw)
 
         cmd.throttle = P_gain_throttle*(altitude - ground_distance) - D_gain_throttle*(ground_distance-old_ground_distance)
-        if(cmd.throttle>4): # MAX throttle DJI= 4m/s
+        if(abs(cmd.throttle)>4): # MAX throttle DJI= 4m/s
             cmd.throttle=4*(abs(cmd.throttle)/cmd.throttle)
 
         cmd.pitch =    P_gain_pitch*x - D_gain_pitch*(x-old_x)
-        if(cmd.pitch>5): # MAX roll/pitch DJI= 15m/s 
+        if(abs(cmd.pitch)>5): # MAX roll/pitch DJI= 15m/s 
             cmd.pitch=5*(abs(cmd.pitch)/cmd.pitch)
 
         #print("P part: ", -P_gain_yaw*angle,", D part: ",- D_gain_yaw*(angle-old_angle)) 
