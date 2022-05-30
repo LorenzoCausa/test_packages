@@ -47,7 +47,7 @@ def parse_opt():
     parser.add_argument('--source', nargs='+', type=str, default='ros', help='Path to an image, default works with ros')
     parser.add_argument('--device', nargs='+', type=str, default=['cuda'], help='Device to use: cpu or cuda')
     parser.add_argument('--confidence', nargs='+', type=float, default=[0.7], help='Min confidence to do mask')
-    parser.add_argument('--show_segmentation', nargs='+', type=bool, default=False, help='True or False, publish the segmentation or not, without segmentation is faster')
+    parser.add_argument('--show_segmentation', nargs='+', type=int, default=[0], help='1 or 0(True or False), publish the segmentation or not, without segmentation is faster')
     parser.add_argument('--save_frames', nargs='+', type=int, default=[0], help='put anything put 0 to save segmentation, show_segmentation must be True')
     opt = parser.parse_args()
     return opt
@@ -198,16 +198,18 @@ def main():
     if(args.weights=="default"):
         cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml")
         my_metadata = MetadataCatalog.get(cfg.DATASETS.TRAIN[0])
+        #print(my_metadata)
 
     else:
         cfg.MODEL.ROI_HEADS.NUM_CLASSES=1
         cfg.MODEL.WEIGHTS = os.path.join(ROOT,"detectron2_weights",args.weights[0])
         my_metadata = Metadata()
         my_metadata.set(thing_classes = ['rail'])
+        #print(my_metadata)
 
     predictor = DefaultPredictor(cfg)
     
-    show_segmentation=args.show_segmentation
+    show_segmentation=args.show_segmentation[0]
 
     # For test and debug
     if(args.source!='ros'):
@@ -250,7 +252,7 @@ def main():
             [center,angle,altitude]=getOrientedBoxes(mask,False,pub_boxes)
             #[center,angle,altitude]=getOrientedBoxes(mask,False)
 
-            if(show_segmentation):
+            if(show_segmentation==1):
                 segmentation=showSegmentation(v,outputs,False,pub_segm)
 
                 if(save_frames>0):
