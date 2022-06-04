@@ -303,6 +303,12 @@ def main():
                 loc.position.z=altitude
                 loc.orientation.z=angle
                 pub_loc.publish(loc)
+
+            else:
+                loc=Pose()
+                loc.orientation.w = 42 # Just a way to say that no rail was detected
+                pub_loc.publish(loc)
+
             print("img dimension: ",cv_image.shape)
             print("img seg time: ", time.time()-now)
 

@@ -13,6 +13,7 @@ x=float(0)
 y=float(0)
 angle=float(0)
 ground_distance=float(3)
+rail_detected=float(0)
 
 old_x=float(0)
 old_y=float(0)
@@ -41,10 +42,11 @@ def update_olds():
 
 # SUBSCRIBERs CALLBACK
 def callback_loc(pose):
-    global x,y,angle
+    global x,y,angle,rail_detected
     x=pose.position.x
     y=pose.position.y
     angle=pose.orientation.z
+    rail_detected=pose.orientation.w
 
 def callback_ground(distance):
     global ground_distance
@@ -60,8 +62,9 @@ def main():
     rate = rospy.Rate(20) # 20hz 
 
     while not rospy.is_shutdown():
-        cmd.yaw =     -P_gain_yaw*angle - D_gain_yaw*(angle-old_angle) # signs may be due to the inverted image of the simulation
-        if(abs(cmd.yaw)>30): # MAX yaw DJI= 100 degree/s 
+
+        cmd.yaw = -P_gain_yaw*angle - D_gain_yaw*(angle-old_angle) # signs may be due to the inverted image of the simulation
+        if(abs(cmd.yaw)>3)0: # MAX yaw DJI= 100 degree/s 
             cmd.yaw=30*(abs(cmd.yaw)/cmd.yaw)
 
         cmd.throttle = P_gain_throttle*(altitude - ground_distance) - D_gain_throttle*(ground_distance-old_ground_distance)
@@ -88,9 +91,14 @@ def main():
 
         # speed management3
         #cmd.roll=max(2-abs(x)/50,0)*max(2-abs(angle)/10,0) # MAX =2*2=4          
- 
+
+        if(rail_detected==42): # It means rails not detected, so keep the drone still
+            cmd.yaw = 0
+            cmd.pitch = 0
+            cmd.roll = 0
+
         command_pub.publish(cmd)
-        print("x:",x,", y:",y,", angle:",angle,", ground distance:",ground_distance)
+        print("rail detected: ",(rail_detected!=42)," x:",x,", y:",y,", angle:",angle,", ground distance:",ground_distance)
         rate.sleep()
 
 if __name__ == "__main__":
