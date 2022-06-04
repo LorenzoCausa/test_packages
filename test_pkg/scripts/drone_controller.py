@@ -64,7 +64,7 @@ def main():
     while not rospy.is_shutdown():
 
         cmd.yaw = -P_gain_yaw*angle - D_gain_yaw*(angle-old_angle) # signs may be due to the inverted image of the simulation
-        if(abs(cmd.yaw)>3)0: # MAX yaw DJI= 100 degree/s 
+        if(abs(cmd.yaw)>30): # MAX yaw DJI= 100 degree/s 
             cmd.yaw=30*(abs(cmd.yaw)/cmd.yaw)
 
         cmd.throttle = P_gain_throttle*(altitude - ground_distance) - D_gain_throttle*(ground_distance-old_ground_distance)
