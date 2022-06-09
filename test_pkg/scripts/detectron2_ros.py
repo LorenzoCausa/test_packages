@@ -261,6 +261,7 @@ def main():
                 mask=getMask(outputs)
                 getOrientedBoxes(mask,True)
                 showSegmentation(v,outputs)
+                print(files[i])
                 print("img dimension: ",img.shape)
                 print("total time: ", time.time()-now)
                 cv2.waitKey(0)
