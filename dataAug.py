@@ -33,6 +33,10 @@ for i in range(len(files)):
     augmented = img * contrast_coeff 
     cv2.imwrite(os.path.join(pathOut,"augmented_contrast_"+str(i)+".jpg"),augmented)
 
+    dsize = (512, 512)
+    augmented = cv2.resize(img, dsize, interpolation = cv2.INTER_AREA)
+    cv2.imwrite(os.path.join(pathOut,"augmented_resize_"+str(i)+".jpg"),augmented)
+
     #brightness_coeff=random.randint(0, 50)
     #print(brightness_coeff)
     #augmented = img + brightness_coeff
