@@ -37,6 +37,12 @@ for i in range(len(files)):
     augmented = cv2.resize(img, dsize, interpolation = cv2.INTER_AREA)
     cv2.imwrite(os.path.join(pathOut,"augmented_resize_"+str(i)+".jpg"),augmented)
 
+    augmented = cv2.cvtColor(augmented, cv2.COLOR_BGR2GRAY)
+    cv2.imwrite(os.path.join(pathOut,"augmented_gray_resize_"+str(i)+".jpg"),augmented)
+
+    augmented = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    cv2.imwrite(os.path.join(pathOut,"augmented_gray_"+str(i)+".jpg"),augmented)
+
     #brightness_coeff=random.randint(0, 50)
     #print(brightness_coeff)
     #augmented = img + brightness_coeff
