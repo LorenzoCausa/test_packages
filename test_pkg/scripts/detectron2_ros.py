@@ -294,7 +294,7 @@ def main():
             #[center,angle,altitude]=getOrientedBoxes(mask,False)
 
             if(show_segmentation==1):
-                v = Visualizer(cv_image[:, :, ::-1],
+                v = Visualizer(img[:, :, ::-1],
                  metadata=my_metadata, 
                  scale=1, 
                  instance_mode=ColorMode.IMAGE_BW    # remove the colors of unsegmented pixels. This option is only available for segmentation models
