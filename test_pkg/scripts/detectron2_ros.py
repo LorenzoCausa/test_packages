@@ -49,6 +49,7 @@ def parse_opt():
     parser.add_argument('--confidence', nargs='+', type=float, default=[0.7], help='Min confidence to do mask')
     parser.add_argument('--show_segmentation', nargs='+', type=int, default=[0], help='1 or 0(True or False), publish the segmentation or not, without segmentation is faster')
     parser.add_argument('--save_frames', nargs='+', type=int, default=[0], help='put anything put 0 to save segmentation, show_segmentation must be True')
+    parser.add_argument('--resize', nargs='+', type=float, default=[1], help='To change resolution of the image between [0, 1]')
     opt = parser.parse_args()
     return opt
 
@@ -189,6 +190,7 @@ def main():
     rospy.init_node('detectron2', anonymous=False)
     args= parse_opt()
     save_frames=args.save_frames[0]
+    resize=args.resize[0]
     cfg = get_cfg()
     # add project-specific config (e.g., TensorMask) here if you're not running a model in detectron2's core library
     cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
@@ -216,7 +218,8 @@ def main():
         if(os.path.isfile(args.source[0])):
             img = cv2.imread(args.source[0])
             # resize image
-            dsize = (512, 512)
+            im_height,im_width,_=img.shape
+            dsize = (int(im_width*resize), int(im_height*resize))
             img = cv2.resize(img, dsize, interpolation = cv2.INTER_AREA)
             #cv2.imshow("my image",img)
             #cv2.waitKey()
@@ -247,7 +250,8 @@ def main():
                 # reading each files
                 img = cv2.imread(filename)
                 # resize image
-                dsize = (512, 512)
+                im_height,im_width,_=img.shape
+                dsize = (int(im_width*resize), int(im_height*resize))
                 img = cv2.resize(img, dsize, interpolation = cv2.INTER_AREA)
                 now = time.time()   
                 outputs = predictor(img)
@@ -279,17 +283,22 @@ def main():
 
         while not rospy.is_shutdown():
             now = time.time() 
-            v = Visualizer(cv_image[:, :, ::-1],
-               metadata=my_metadata, 
-               scale=1, 
-               instance_mode=ColorMode.IMAGE_BW    # remove the colors of unsegmented pixels. This option is only available for segmentation models
-               )
-            outputs = predictor(cv_image)
+
+            im_height,im_width,_=cv_image.shape
+            dsize = (int(im_width*resize), int(im_height*resize))
+            img = cv2.resize(cv_image, dsize, interpolation = cv2.INTER_AREA)
+
+            outputs = predictor(img)
             mask=getMask(outputs)
             [center,angle,altitude]=getOrientedBoxes(mask,False,pub_boxes)
             #[center,angle,altitude]=getOrientedBoxes(mask,False)
 
             if(show_segmentation==1):
+                v = Visualizer(cv_image[:, :, ::-1],
+                 metadata=my_metadata, 
+                 scale=1, 
+                 instance_mode=ColorMode.IMAGE_BW    # remove the colors of unsegmented pixels. This option is only available for segmentation models
+                 )
                 segmentation=showSegmentation(v,outputs,False,pub_segm)
 
                 if(save_frames>0):
@@ -310,7 +319,7 @@ def main():
                 loc.orientation.w = 42 # Just a way to say that no rail was detected
                 pub_loc.publish(loc)
 
-            print("img dimension: ",cv_image.shape)
+            print("img dimension: ",img.shape)
             print("img seg time: ", time.time()-now)
 
     #rospy.spin()
