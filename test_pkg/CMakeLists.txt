@@ -180,6 +180,8 @@ include_directories(
    scripts/UDP_socket_test_speed.py
    scripts/frames2video.py
    scripts/pc_drone_controller.py
+   scripts/drone_controller_simulation.py
+   scripts/drone_controller.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 
