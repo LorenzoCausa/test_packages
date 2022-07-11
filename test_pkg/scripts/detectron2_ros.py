@@ -148,10 +148,10 @@ def getOrientedBoxes(mask,plot,pub=None):
             #angles.append(angle)
             #centers.append(center)
 
-            label = str(angle) + " degrees"
+            #label = str(angle) + " degrees"
             #textbox = cv2.rectangle(mask, (center[0]-35, center[1]-25), (center[0] + 295, center[1] + 10), (255,255,255), -1)
-            cv2.drawContours(mask,[box],0,(0,0,255),2)
-            cv2.putText(mask, label, (center[0]-0, center[1]-25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,200,0), 1, cv2.LINE_AA)      
+            #cv2.drawContours(mask,[box],0,(0,0,255),2)
+            #cv2.putText(mask, label, (center[0]-0, center[1]-25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,200,0), 1, cv2.LINE_AA)      
 
     #print(angles)
     #print(centers)
@@ -170,6 +170,10 @@ def getOrientedBoxes(mask,plot,pub=None):
 
     #print(avg_angle)
     #print(avg_center)
+
+    label = str(angle) + " degrees"
+    cv2.drawContours(mask,[box],0,(0,0,255),2)
+    cv2.putText(mask, label, (center[0]-0, center[1]-25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,200,0), 1, cv2.LINE_AA) 
 
     mask = cv2.circle(mask, (center[0], center[1]), radius=10, color=(0, 0, 255), thickness=3) # draw the center
     center=[int(1000*(center[0]-im_width/2)/im_width),int(1000*(center[1]-im_height/2)/im_height)]
