@@ -12,7 +12,7 @@ from std_msgs.msg import Float32
 x=float(0)
 y=float(0)
 angle=float(0)
-ground_distance=float(3)
+ground_distance=float(0.25)
 rail_detected=float(0)
 
 old_x=float(0)
@@ -20,17 +20,17 @@ old_y=float(0)
 old_angle=float(0)
 old_ground_distance=float(3)
 
-P_gain_yaw=1
-D_gain_yaw=20
+P_gain_yaw=0.2
+D_gain_yaw=0
 
-P_gain_throttle=1
-D_gain_throttle=10
+P_gain_throttle=0.01
+D_gain_throttle=0
 
-P_gain_pitch=0.001
-D_gain_pitch=0.005
+P_gain_pitch=0
+D_gain_pitch=0
 
 
-altitude=3 # meters
+altitude=1 # meters
 
 # FUNCTIONs
 def update_olds():
@@ -63,17 +63,17 @@ def main():
 
     while not rospy.is_shutdown():
 
-        cmd.yaw = -P_gain_yaw*angle - D_gain_yaw*(angle-old_angle) # signs may be due to the inverted image of the simulation
+        cmd.yaw = +P_gain_yaw*angle + D_gain_yaw*(angle-old_angle) # signs may be due to the inverted image of the simulation
         if(abs(cmd.yaw)>30): # MAX yaw DJI= 100 degree/s 
-            cmd.yaw=30*(abs(cmd.yaw)/cmd.yaw)
+            cmd.yaw=-30*(abs(cmd.yaw)/cmd.yaw)
 
         cmd.throttle = P_gain_throttle*(altitude - ground_distance) - D_gain_throttle*(ground_distance-old_ground_distance)
         if(abs(cmd.throttle)>4): # MAX throttle DJI= 4m/s
             cmd.throttle=4*(abs(cmd.throttle)/cmd.throttle)
 
-        cmd.pitch =    P_gain_pitch*x - D_gain_pitch*(x-old_x)
+        cmd.pitch =    -P_gain_pitch*x + D_gain_pitch*(x-old_x)
         if(abs(cmd.pitch)>5): # MAX roll/pitch DJI= 15m/s 
-            cmd.pitch=5*(abs(cmd.pitch)/cmd.pitch)
+            cmd.pitch=-5*(abs(cmd.pitch)/cmd.pitch)
 
         #print("P part: ", -P_gain_yaw*angle,", D part: ",- D_gain_yaw*(angle-old_angle)) 
         update_olds()
@@ -99,6 +99,11 @@ def main():
 
         command_pub.publish(cmd)
         print("rail detected: ",(rail_detected!=42)," x:",x,", y:",y,", angle:",angle,", ground distance:",ground_distance)
+        print("commands: ")
+        print("yaw: ", cmd.yaw)
+        print("pitch: ",cmd.pitch)
+        print("roll: ", cmd.roll)
+        print("throttle: ", cmd.throttle)
         rate.sleep()
 
 if __name__ == "__main__":

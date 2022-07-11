@@ -100,75 +100,79 @@ def getOrientedBoxes(mask,plot,pub=None):
     # Find all the contours in the thresholded image
     contours, _ = cv2.findContours(bw, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
     
-    angles=[]
-    centers=[]
-    sum_altitudes=0
+    #angles=[]
+    #centers=[]
+    #sum_altitudes=0
+    area=0
 
     for i, c in enumerate(contours): 
-        # Calculate the area of each contour
-        area = cv2.contourArea(c)
+        if cv2.contourArea(c)>area:
+
+            # Calculate the area of each contour
+            area = cv2.contourArea(c)
  
-        # Ignore contours that are too small or too large
-        #if area < 3700 or 100000 < area:
-        #   continue
+            # Ignore contours that are too small or too large
+            #if area < 3700 or 100000 < area:
+            #   continue
 
-        #cv.minAreaRect returns:
-        #(center(x, y), (width, height), angle of rotation) = cv2.minAreaRect(c)
-        rect = cv2.minAreaRect(c)
-        box = cv2.boxPoints(rect)
-        box = np.int0(box)
+            #cv.minAreaRect returns:
+            #(center(x, y), (width, height), angle of rotation) = cv2.minAreaRect(c)
+            rect = cv2.minAreaRect(c)
+            box = cv2.boxPoints(rect)
+            box = np.int0(box)
 
-        # Retrieve the key parameters of the rotated bounding box
-        center = (int(rect[0][0]),int(rect[0][1])) 
-        width = int(rect[1][0])
-        height = int(rect[1][1])
-        angle = int(rect[2])
+            # Retrieve the key parameters of the rotated bounding box
+            center = (int(rect[0][0]),int(rect[0][1])) 
+            width = int(rect[1][0])
+            height = int(rect[1][1])
+            angle = int(rect[2])
 
-        if width < height:
-            angle = 90 - angle
-        else:
-            angle = 180 - angle
+            if width < height:
+                angle = 90 - angle
+            else:
+                angle = 180 - angle
         
-        if angle > 180:
-            angle=angle-180
+            if angle > 180:
+                angle=angle-180
 
-        angle=angle-90
+            angle=angle-90
 
-        if(width<height):
-            norm_width=width/im_width
-        else:
-            norm_width=height/im_width
+            if(width<height):
+                norm_width=width/im_width
+            else:
+                norm_width=height/im_width
         
-        sum_altitudes=sum_altitudes+0.75/(norm_width+0.01) # NEED TO BE ADJUSTED, RIGHT NOW IS SETTED FOR THE SIMULATION
+            #sum_altitudes=sum_altitudes+0.75/(norm_width+0.01) # NEED TO BE ADJUSTED, RIGHT NOW IS SETTED FOR THE SIMULATION
+            altitude=0.75/(norm_width+0.01) # NEED TO BE ADJUSTED, RIGHT NOW IS SETTED FOR THE SIMULATION
 
-        angles.append(angle)
-        centers.append(center)
+            #angles.append(angle)
+            #centers.append(center)
 
-        label = str(angle) + " degrees"
-        #textbox = cv2.rectangle(mask, (center[0]-35, center[1]-25), (center[0] + 295, center[1] + 10), (255,255,255), -1)
-        cv2.drawContours(mask,[box],0,(0,0,255),2)
-        cv2.putText(mask, label, (center[0]-0, center[1]-25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,200,0), 1, cv2.LINE_AA)      
+            label = str(angle) + " degrees"
+            #textbox = cv2.rectangle(mask, (center[0]-35, center[1]-25), (center[0] + 295, center[1] + 10), (255,255,255), -1)
+            cv2.drawContours(mask,[box],0,(0,0,255),2)
+            cv2.putText(mask, label, (center[0]-0, center[1]-25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,200,0), 1, cv2.LINE_AA)      
 
     #print(angles)
     #print(centers)
-    tot_angle=0
-    tot_center=[0,0]
+    #tot_angle=0
+    #tot_center=[0,0]
 
-    for i in range(len(angles)):
-        tot_angle=tot_angle+angles[i]
-        tot_center[0]=tot_center[0]+centers[i][0]
-        tot_center[1]=tot_center[1]+centers[i][1]
+    #for i in range(len(angles)):
+    #    tot_angle=tot_angle+angles[i]
+    #    tot_center[0]=tot_center[0]+centers[i][0]
+    #    tot_center[1]=tot_center[1]+centers[i][1]
     
-    avg_angle=tot_angle/len(angles)
-    avg_center=[tot_center[0]/len(centers),tot_center[1]/len(centers)]
-    avg_center=[int(avg_center[0]),int(avg_center[1])]
-    avg_altitude=sum_altitudes/len(angles)
+    #avg_angle=tot_angle/len(angles)
+    #avg_center=[tot_center[0]/len(centers),tot_center[1]/len(centers)]
+    #avg_center=[int(avg_center[0]),int(avg_center[1])]
+    #avg_altitude=sum_altitudes/len(angles)
 
     #print(avg_angle)
     #print(avg_center)
 
-    mask = cv2.circle(mask, (avg_center[0], avg_center[1]), radius=10, color=(0, 0, 255), thickness=3) # draw the center
-    avg_center=[int(1000*(avg_center[0]-im_width/2)/im_width),int(1000*(avg_center[1]-im_height/2)/im_height)]
+    mask = cv2.circle(mask, (center[0], center[1]), radius=10, color=(0, 0, 255), thickness=3) # draw the center
+    center=[int(1000*(center[0]-im_width/2)/im_width),int(1000*(center[1]-im_height/2)/im_height)]
 
     if plot:
         cv2.imshow("Mask with boxes", mask)
@@ -177,7 +181,7 @@ def getOrientedBoxes(mask,plot,pub=None):
         cv_bridge=CvBridge()
         pub.publish(cv_bridge.cv2_to_imgmsg(mask, 'bgr8'))
 
-    return avg_center,avg_angle,avg_altitude
+    return center,angle,altitude
 
 # SUBSCRIBERs CALLBACK
 def callback(startImg):
