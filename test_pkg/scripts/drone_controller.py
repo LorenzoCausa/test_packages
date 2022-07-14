@@ -20,17 +20,17 @@ old_y=float(0)
 old_angle=float(0)
 old_ground_distance=float(3)
 
-P_gain_yaw=0.2
+P_gain_yaw=0.1
 D_gain_yaw=0
 
-P_gain_throttle=0.01
+P_gain_throttle=0.05
 D_gain_throttle=0
 
-P_gain_pitch=0
+P_gain_pitch=0.0001
 D_gain_pitch=0
 
 
-altitude=1 # meters
+altitude=3 # meters
 
 # FUNCTIONs
 def update_olds():
@@ -63,17 +63,17 @@ def main():
 
     while not rospy.is_shutdown():
 
-        cmd.yaw = +P_gain_yaw*angle + D_gain_yaw*(angle-old_angle) # signs may be due to the inverted image of the simulation
+        cmd.yaw = -P_gain_yaw*angle - D_gain_yaw*(angle-old_angle) # signs may be due to the inverted image of the simulation
         if(abs(cmd.yaw)>30): # MAX yaw DJI= 100 degree/s 
-            cmd.yaw=-30*(abs(cmd.yaw)/cmd.yaw)
+            cmd.yaw=30*(abs(cmd.yaw)/cmd.yaw)
 
         cmd.throttle = P_gain_throttle*(altitude - ground_distance) - D_gain_throttle*(ground_distance-old_ground_distance)
         if(abs(cmd.throttle)>4): # MAX throttle DJI= 4m/s
             cmd.throttle=4*(abs(cmd.throttle)/cmd.throttle)
 
-        cmd.pitch =    -P_gain_pitch*x + D_gain_pitch*(x-old_x)
+        cmd.pitch =    P_gain_pitch*x - D_gain_pitch*(x-old_x)
         if(abs(cmd.pitch)>5): # MAX roll/pitch DJI= 15m/s 
-            cmd.pitch=-5*(abs(cmd.pitch)/cmd.pitch)
+            cmd.pitch=5*(abs(cmd.pitch)/cmd.pitch)
 
         #print("P part: ", -P_gain_yaw*angle,", D part: ",- D_gain_yaw*(angle-old_angle)) 
         update_olds()
@@ -87,7 +87,7 @@ def main():
         #    cmd.roll=0
 
         # speed management2
-        cmd.roll=max(2-abs(x)/50,0)+max(2-abs(angle)/10,0) # MAX =2+2=4  best for now 
+        #cmd.roll=max(2-abs(x)/50,0)+max(2-abs(angle)/10,0) # MAX =2+2=4  best for now 
 
         # speed management3
         #cmd.roll=max(2-abs(x)/50,0)*max(2-abs(angle)/10,0) # MAX =2*2=4          
